@@ -12,12 +12,11 @@ class AddressBase(BaseModel):
     postal_code: str = Field(..., description="Postal code", example="01001")
     country_code: str = Field(..., description="ISO 3166-1 alpha-2 country code", example="UA")
 
-
 class AddressCreate(AddressBase):
     pass
 
 
-class AddressRead(AddressBase):
+class AddressOut(AddressBase):
     id: int
     is_valid: bool
     created_at: datetime
