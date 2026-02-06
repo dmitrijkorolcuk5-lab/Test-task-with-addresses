@@ -13,6 +13,7 @@ sys.path.insert(0, dirname(dirname(abspath(__file__))))
 
 from app.db.base_class import Base
 from app.models.address import Address  
+from app.core.config import settings
 
 config = context.config
 
@@ -23,7 +24,7 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 def run_migrations_offline() -> None:
-    url = config.get_main_option("sqlalchemy.url")
+    url = settings.DATABASE_URL.replace("postgresql+asyncpg", "postgresql")
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -35,8 +36,10 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 def run_migrations_online() -> None:
+    configuration = config.get_section(config.config_ini_section, {})
+    configuration["sqlalchemy.url"] = settings.DATABASE_URL.replace("postgresql+asyncpg", "postgresql")
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        configuration,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
