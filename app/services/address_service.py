@@ -13,6 +13,10 @@ class AddressService:
     async def get_all_addresses(self, skip: int = 0, limit: int = 100) -> List[Address]:
         return await self.repo.get_all(skip=skip, limit=limit)
 
+    # НОВИЙ МЕТОД: Отримує загальну кількість через репозиторій
+    async def get_addresses_count(self) -> int:
+        return await self.repo.get_count()
+
     async def get_address_by_id(self, address_id: int) -> Address | None:
         return await self.repo.get_by_id(address_id)
 

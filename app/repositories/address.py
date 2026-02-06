@@ -1,6 +1,6 @@
+from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import func
 from app.models.address import Address
 
 class AddressRepository:
@@ -16,13 +16,15 @@ class AddressRepository:
     async def get_by_id(self, address_id: int) -> Address | None:
         return await self.session.get(Address, address_id)
     
+    
     async def get_all(self, skip: int = 0, limit: int = 100):
         result = await self.session.execute(select(Address).offset(skip).limit(limit))
         return result.scalars().all()
 
-    async def count(self) -> int:
-        result = await self.session.execute(select(func.count()).select_from(Address))
-        return result.scalar()
+    
+    async def get_count(self) -> int:
+        result = await self.session.execute(select(func.count(Address.id)))
+        return result.scalar() or 0
 
     async def delete(self, address_id: int) -> bool:
         address = await self.get_by_id(address_id)

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List
+from typing import Any, Dict
 from app.db.session import get_db
 from app.schemas.address import AddressCreate, AddressOut
 from arq.connections import ArqRedis
@@ -8,11 +8,10 @@ from app.services.address_service import AddressService
 
 router = APIRouter()
 
-# Dependency to get the Redis pool from the application state
+
 def get_redis(request: Request) -> ArqRedis | None:
     return getattr(request.app.state, "redis_pool", None)
 
-# Dependency to create an instance of the AddressService
 def get_address_service(db: AsyncSession = Depends(get_db), redis: ArqRedis | None = Depends(get_redis)) -> AddressService:
     return AddressService(db, redis)
 
@@ -21,9 +20,21 @@ async def create_address(address_data: AddressCreate, service: AddressService = 
     new_address = await service.create_address_and_enqueue_validation(address_data)
     return new_address
 
-@router.get("/", response_model=List[AddressOut])
-async def get_addresses(skip: int = 0, limit: int = 100, service: AddressService = Depends(get_address_service)):
-    return await service.get_all_addresses(skip=skip, limit=limit)
+@router.get("/")
+async def get_addresses(skip: int = 0, limit: int = 10, service: AddressService = Depends(get_address_service)):
+    # Отримуємо дані та загальну кількість через сервіс
+    addresses = await service.get_all_addresses(skip=skip, limit=limit)
+    total = await service.get_addresses_count() 
+    
+   
+    return {
+        "items": addresses,
+        "total": total,
+        "page": (skip // limit) + 1,
+        "pages": (total + limit - 1) // limit if limit > 0 else 1,
+        "limit": limit,
+        "skip": skip
+    }
 
 @router.get("/{address_id}", response_model=AddressOut)
 async def get_address(address_id: int, service: AddressService = Depends(get_address_service)):
