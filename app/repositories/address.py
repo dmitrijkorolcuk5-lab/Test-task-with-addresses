@@ -15,6 +15,14 @@ class AddressRepository:
     async def get_by_id(self, address_id: int) -> Address | None:
         return await self.session.get(Address, address_id)
     
-    async def get_all(self):
-        result = await self.session.execute(select(Address))
+    async def get_all(self, skip: int = 0, limit: int = 100):
+        result = await self.session.execute(select(Address).offset(skip).limit(limit))
         return result.scalars().all()
+
+    async def delete(self, address_id: int) -> bool:
+        address = await self.get_by_id(address_id)
+        if address:
+            await self.session.delete(address)
+            await self.session.flush()
+            return True
+        return False
