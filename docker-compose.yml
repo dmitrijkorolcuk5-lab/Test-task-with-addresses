@@ -6,11 +6,11 @@ services:
     container_name: shipengine_db_container
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: admin123
-      POSTGRES_DB: shipengine_db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5433:5432"
+      - "${POSTGRES_EXTERNAL_PORT}:${POSTGRES_PORT}"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -19,7 +19,7 @@ services:
     container_name: shipengine_redis_container
     restart: always
     ports:
-      - "6380:6379"
+      - "${REDIS_EXTERNAL_PORT}:${REDIS_PORT}"
 
   api:
     build: .
