@@ -22,7 +22,6 @@ async def create_address(address_data: AddressCreate, service: AddressService = 
 
 @router.get("/")
 async def get_addresses(skip: int = 0, limit: int = 10, service: AddressService = Depends(get_address_service)):
-    # Отримуємо дані та загальну кількість через сервіс
     addresses = await service.get_all_addresses(skip=skip, limit=limit)
     total = await service.get_addresses_count() 
     
